@@ -13,20 +13,27 @@ Product details -> AI script -> editable storyboard -> approval -> scene visuals
 
 ## Run it (Windows PowerShell)
 
-```powershell
-# one time: Python 3.13 and FFmpeg
-winget install Python.Python.3.12
-winget install Gyan.FFmpeg          # then CLOSE and reopen PowerShell
-ffmpeg -version                     # must print a version
-ffprobe -version
+The backend serves the frontend too, so **one command starts both**. Do not start
+`frontend/index.html` with VS Code Live Server; that serves only the UI and the app
+cannot reach its API.
 
-cd path\to\PromoGenAI_Upgrade
-.\start.ps1                         # creates .venv, installs requirements, creates backend\.env, starts the server
+```powershell
+# One time only: install Python 3.13 and FFmpeg, then close and reopen PowerShell.
+winget install --id Python.Python.3.13 -e
+winget install --id Gyan.FFmpeg -e
+
+# Go to this project folder (adjust this path if you saved the project elsewhere).
+Set-Location "$HOME\OneDrive\Documents\Desktop\PromoGenAI_Upgrade"
+
+# Run the backend and serve the frontend at http://127.0.0.1:8000.
+Set-ExecutionPolicy -Scope Process Bypass -Force
+.\start.ps1
 ```
 
-Open <http://127.0.0.1:8000>, register, and use the sample products **SilkGlow Anti-Frizz Hair Serum** or
+Keep this PowerShell window open while using the app. Open <http://127.0.0.1:8000> in your browser,
+register, and use the sample products **SilkGlow Anti-Frizz Hair Serum** or
 **SparkleMax Kitchen Cleaner** (marked "Sample"), or click **Promote my own product**.
-If scripts are blocked: `Set-ExecutionPolicy -Scope Process Bypass` then `.\start.ps1`.
+The terminal prints an error if startup fails; resolve it before opening the page.
 
 ## Configuration (`backend\.env`, created from `.env.example`; restart the server after editing)
 
@@ -75,11 +82,10 @@ transitions, optional voice-over. Only one render runs at a time server-wide; ot
 ## Test it
 
 ```powershell
-cd backend
-.\.\.venv313\Scripts\python.exe test_core.py   # offline: script logic, 3 aspect ratios, font handling (needs FFmpeg for render checks)
-# in a second window while the server is running:
-.\.venv313\Scripts\python.exe smoke_test.py   # full API workflow for SilkGlow and Kitchen Cleaner, incl. render + download
-.\.venv313\Scripts\python.exe smoke_test.py --no-render
+# Run from the project root in a second PowerShell window while the server is running.
+.\backend\.venv313\Scripts\python.exe .\backend\test_core.py
+.\backend\.venv313\Scripts\python.exe .\backend\smoke_test.py
+.\backend\.venv313\Scripts\python.exe .\backend\smoke_test.py --no-render
 ```
 Manual check: generate a script for each sample product and confirm the wording changes; edit and approve; render 9:16;
 open the preview and download the MP4; confirm `ffprobe backend\renders\<file>.mp4` shows h264.

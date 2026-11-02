@@ -94,10 +94,11 @@ def main():
     check("Hindi without an LLM key is flagged as English fallback" if not caps["llm"] else "Hindi script generated", (bool(hi.get("notice")) if not caps["llm"] else hi["language"] == "Hindi"))
 
     pid, script = pids["Kitchen Cleaner"], scripts["Kitchen Cleaner"]
+    expected_mode = script["mode"]
     script["hook"] = "Edited hook"
     script["mode"] = "live"  # a client must not be able to fake an AI-written script
     check("script edit saves", c.put(f"/projects/{pid}/script", json={"script": script}).status_code == 200)
-    check("edited script persisted, mode cannot be faked", c.get(f"/projects/{pid}").json()["script"]["hook"] == "Edited hook" and c.get(f"/projects/{pid}").json()["script"]["mode"] == scripts["Kitchen Cleaner"]["mode"])
+    check("edited script persisted, mode cannot be faked", c.get(f"/projects/{pid}").json()["script"]["hook"] == "Edited hook" and c.get(f"/projects/{pid}").json()["script"]["mode"] == expected_mode)
     script["scenes"][0]["media"] = "u999_" + "0" * 32 + ".jpg"
     check("cannot attach media that is not yours", c.put(f"/projects/{pid}/script", json={"script": script}).status_code == 422)
     script["scenes"][0]["media"] = None

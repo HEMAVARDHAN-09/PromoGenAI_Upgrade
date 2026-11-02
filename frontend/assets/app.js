@@ -1,8 +1,9 @@
 'use strict';
 /* PromoGen AI - single-page frontend (vanilla JS). Talks to the FastAPI backend under /api. */
 
-// When served by the backend (http://127.0.0.1:8000) use relative URLs; otherwise (e.g. VS Code Live Server) call the backend directly.
-const API = window.PROMOGEN_API || ((location.protocol.startsWith('http') && (location.port === '8000' || location.port === '')) ? '/api' : 'http://127.0.0.1:8000/api');
+// Use the current origin for the app's HTTP and HTTPS servers; Live Server calls the HTTP backend directly.
+const sameOriginServer = location.protocol.startsWith('http') && (['8000', '8443'].includes(location.port) || location.port === '');
+const API = window.PROMOGEN_API || (sameOriginServer ? '/api' : 'http://127.0.0.1:8000/api');
 
 const state = { token: localStorage.getItem('pg_token'), user: null, caps: null, page: 'dashboard', product: null, project: null, pollTimer: null, blobs: new Map() };
 const app = document.querySelector('#app');
